@@ -1,82 +1,31 @@
-Skip to content
-ryano-grn
-GRN
-Repository navigation
-Code
-Issues
-1
- (1)
-Pull requests
-Actions
-Projects
-Wiki
-Security and quality
-Insights
-Settings
-Claude Code
-test claude #1
-All jobs
-Run details
-Annotations
-1 error
-claude
-failed 2 minutes ago in 12s
-Search logs
-2s
-7s
-Issue body contains exact trigger phrase '@claude'
-Auto-detected mode: tag for event: issues
-Requesting OIDC token...
-Attempt 1 of 3...
-OIDC token successfully obtained
-Exchanging OIDC token for app token...
-Attempt 1 of 3...
-App token successfully obtained
-Using GITHUB_TOKEN from OIDC
-Checking permissions for actor: ryano-grn
-Permission level retrieved: admin
-Actor has write access: admin
-Issue body contains exact trigger phrase '@claude'
-Mode: tag
-Context prompt: NO PROMPT
-Trigger result: true
-Preparing with mode: tag for event: issues
-Actor type: User
-Verified human actor: ryano-grn
-✅ Created initial comment with ID: 4870212444
-Successfully fetched issue #1 data
-Found 1 image(s) in issue_comment 4870212444
-Downloading https://github.com/user-attachments/assets/5ac382c7-e004-429b-8e35-7feb3e8f9c6f...
-✓ Saved: /tmp/github-images/image-1783024205302-0.gif
-Source branch SHA: 4928e457fdb6f27de4ec7a9351401661412b5fbc
-Creating local branch claude/issue-1-20260702-2030 for issue #1 from source branch: main...
-Fetching and checking out source branch: main
-fatal: not a git repository (or any of the parent directories): .git
-Error in branch setup: 135 |  * could be interpreted as shell commands (e.g., branch names containing `;`, `|`, `&&`).
-136 |  *
-137 |  * @param args - Git command arguments (e.g., ["checkout", "branch-name"])
-138 |  */
-139 | function execGit(args: string[]): void {
-140 |   execFileSync("git", args, { stdio: "inherit", env: process.env });
-        ^
-error: Command failed: git fetch origin main --depth=1
- signal: null,
- status: 128,
- output: [ null, null, null ],
-    pid: 2219,
- stdout: null,
- stderr: null,
+name: Claude Code
 
-      at genericNodeError (node:child_process:998:13)
-      at checkExecSyncError (node:child_process:458:27)
-      at execFileSync (node:child_process:269:31)
-      at execGit (/home/runner/work/_actions/anthropics/claude-code-action/v1/src/github/operations/branch.ts:140:3)
-      at setupBranch (/home/runner/work/_actions/anthropics/claude-code-action/v1/src/github/operations/branch.ts:316:5)
-      at async prepareTagMode (/home/runner/work/_actions/anthropics/claude-code-action/v1/src/modes/tag/index.ts:66:28)
-      at async run (/home/runner/work/_actions/anthropics/claude-code-action/v1/src/entrypoints/run.ts:220:17)
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
 
-Error: Process completed with exit code 1.
-Run BUN_BIN="${GITHUB_ACTION_PATH}/bin/bun"
-No buffered inline comments
-0s
-0s
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
